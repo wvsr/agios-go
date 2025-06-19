@@ -13,26 +13,26 @@ import (
 )
 
 func main() {
-	// Load .env file
 	err := godotenv.Load()
+
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
-	// Echo instance
 	e := echo.New()
 
-	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
-	// Routes
 	e.GET("/health", handlers.HealthCheck)
+	e.POST("/api/v1/files/upload", handlers.UploadFile)
+	e.POST("/api/v1/threads", handlers.CreateThread)
+	e.POST("/api/v1/threads/:threadId/messages", handlers.AddMessageToThread)
+	e.GET("/api/v1/threads/:threadId", handlers.GetThread)
 
-	// Start server
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // Default port if not specified
+		port = "8080"
 	}
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%s", port)))
 }
