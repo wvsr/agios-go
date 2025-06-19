@@ -1,8 +1,8 @@
 package services
 
 import (
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -19,7 +19,7 @@ const (
 )
 
 type FileService interface {
-	UploadFile(file io.ReadCloser, filename string) (string, error)
+	UploadFile(file io.ReadCloser, filename string) (string, string)
 }
 
 type FileServiceImpl struct {
@@ -32,13 +32,14 @@ func NewFileService(fileRepository repositories.FileRepository) FileService {
 	}
 }
 
-func (s *FileServiceImpl) UploadFile(file io.ReadCloser, filename string) (string, error) {
+func (s *FileServiceImpl) UploadFile(file io.ReadCloser, filename string) (string, string) {
 	defer file.Close()
 
 	// Check file type
 	mimeType, err := detectMimeType(file)
 	if err != nil {
-		return "", fmt.Errorf("failed to detect file type: %w", err)
+		log.Printf("failed to detect file type: %v", err)
+		return "", ""
 	}
 
 	allowed := false
@@ -49,7 +50,8 @@ func (s *FileServiceImpl) UploadFile(file io.ReadCloser, filename string) (strin
 	}
 
 	if !allowed {
-		return "", fmt.Errorf("invalid file type: %s", mimeType)
+		log.Printf("invalid file type: %s", mimeType)
+		return "", ""
 	}
 
 	// Sanitize filename
@@ -63,15 +65,17 @@ func (s *FileServiceImpl) UploadFile(file io.ReadCloser, filename string) (strin
 	// Save the file to disk
 	err = s.fileRepository.CreateDirectory(uploadDir)
 	if err != nil {
-		return "", fmt.Errorf("failed to create directory: %w", err)
+		log.Printf("failed to create directory: %v", err)
+		return "", ""
 	}
 
 	err = s.fileRepository.SaveFile(dstPath, file)
 	if err != nil {
-		return "", fmt.Errorf("failed to save file: %w", err)
+		log.Printf("failed to save file: %v", err)
+		return "", ""
 	}
 
-	return fileID, nil
+	return fileID, ""
 }
 
 func detectMimeType(file io.Reader) (string, error) {

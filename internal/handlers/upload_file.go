@@ -62,9 +62,9 @@ func UploadFile(fileService services.FileService) echo.HandlerFunc {
 				continue
 			}
 
-			fileID, err := fileService.UploadFile(src, fileHeader.Filename)
-			if err != nil {
-				uploadErrors = append(uploadErrors, UploadError{Field: fileHeader.Filename, Message: err.Error()})
+			fileID, errMsg := fileService.UploadFile(src, fileHeader.Filename)
+			if errMsg != "" {
+				uploadErrors = append(uploadErrors, UploadError{Field: fileHeader.Filename, Message: errMsg})
 				continue
 			}
 

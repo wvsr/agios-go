@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -14,12 +13,13 @@ import (
 
 var QdrantClient qdrant.QdrantClient
 
-func ConnectToQdrant() error {
+func ConnectToQdrant() {
 	godotenv.Load()
 
 	qdrantURL := os.Getenv("QDRANT_URL")
 	if qdrantURL == "" {
-		return fmt.Errorf("QDRANT_URL not set in .env file")
+		log.Println("QDRANT_URL not set in .env file")
+		return
 	}
 
 	qdrantAPIKey := os.Getenv("QDRANT_API_KEY")
@@ -39,13 +39,17 @@ func ConnectToQdrant() error {
 
 	conn, err := grpc.Dial(address, dialOptions...)
 	if err != nil {
-		return fmt.Errorf("failed to connect to Qdrant: %w", err)
+		log.Println("QDRANT_URL not set in .env file")
+		return
+	}
+	if err != nil {
+		log.Printf("failed to connect to Qdrant: %v", err)
+		return
 	}
 
 	QdrantClient = qdrant.NewQdrantClient(conn)
 
 	log.Println("Successfully connected to Qdrant!")
-	return nil
 }
 
 func GetQdrantClient() qdrant.QdrantClient {

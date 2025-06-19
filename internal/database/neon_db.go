@@ -2,7 +2,6 @@ package database
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 
@@ -17,22 +16,26 @@ func ConnectToNeonDB() error {
 
 	dbUrl := os.Getenv("DATABASE_URL")
 	if dbUrl == "" {
-		return fmt.Errorf("DATABASE_URL not set in .env file")
+		log.Println("DATABASE_URL not set in .env file")
+		return nil
 	}
 
 	config, err := pgxpool.ParseConfig(dbUrl)
 	if err != nil {
-		return fmt.Errorf("failed to parse Neon database URL: %w", err)
+		log.Printf("failed to parse Neon database URL: %v", err)
+		return nil
 	}
 
 	NeonPool, err = pgxpool.NewWithConfig(context.Background(), config)
 	if err != nil {
-		return fmt.Errorf("failed to create Neon connection pool: %w", err)
+		log.Printf("failed to create Neon connection pool: %v", err)
+		return nil
 	}
 
 	err = NeonPool.Ping(context.Background())
 	if err != nil {
-		return fmt.Errorf("failed to ping Neon database: %w", err)
+		log.Printf("failed to ping Neon database: %v", err)
+		return nil
 	}
 
 	log.Println("Successfully connected to NeonDB!")
