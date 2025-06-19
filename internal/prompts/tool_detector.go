@@ -6,7 +6,7 @@ import (
 	"github.com/tmc/langchaingo/prompts"
 )
 
-var tool_detector_prompt = prompts.PromptTemplate{
+var ToolDetectorPromptK = prompts.PromptTemplate{
 	Template: strings.ReplaceAll(`<goal>
 You are an AI assistant that helps users by selecting the appropriate tool to handle their query and extracting necessary parameters for that tool.
 Your goal is to analyze the user's query and determine which of the available tools is most suitable.
@@ -100,5 +100,5 @@ User Query:
 {{.user_query}}
 
 Your JSON Output:`, "<<bt>>", "`"),
-	InputVariables: []string{"user_query"},
+	InputVariables: []string{"text"},
 }
