@@ -10,6 +10,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/qdrant/go-client v1.14.0
 	github.com/redis/go-redis/v9 v9.10.0
+	github.com/strrl/tavily-go v0.1.1
 	github.com/tmc/langchaingo v0.1.13
 	google.golang.org/grpc v1.73.0
 	gorm.io/gorm v1.30.0
@@ -66,7 +67,6 @@ require (
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	github.com/strrl/tavily-go v0.1.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/yargevad/filepathx v1.0.0 // indirect

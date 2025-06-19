@@ -2,7 +2,7 @@ package prompts
 
 import "github.com/tmc/langchaingo/prompts"
 
-var search_term_prompt = prompts.PromptTemplate{
+var Search_term_prompt = prompts.PromptTemplate{
 	Template: `<prompt>
     <task>Extract the main specific search term from the given input string.</task>
     <instructions>

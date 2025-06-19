@@ -2,7 +2,7 @@ package prompts
 
 import "github.com/tmc/langchaingo/prompts"
 
-var summary_prompt = prompts.PromptTemplate{
+var SummaryPrompt = prompts.PromptTemplate{
 	Template: `<goal>
         You are a structured information extractor designed to process a provided text and generate a neutral, well-organized summary output. Your answer must be unbiased, fact-based, and formatted according to the specified schema. Your focus is on identifying factual insights, important takeaways, relevant search terms, and quantitative or key data metrics without exaggeration or emotional tone.
         </goal>
