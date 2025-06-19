@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"agios/internal/handlers"
+	"agios/internal/repositories"
+	"agios/internal/services"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -24,8 +26,11 @@ func main() {
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 
+	fileRepository := repositories.NewFileRepository()
+	fileService := services.NewFileService(fileRepository)
+
 	e.GET("/health", handlers.HealthCheck)
-	e.POST("/api/v1/files/upload", handlers.UploadFile)
+	e.POST("/api/v1/files/upload", handlers.UploadFile(fileService))
 	e.POST("/api/v1/threads", handlers.CreateThread)
 	e.POST("/api/v1/threads/:threadId/messages", handlers.AddMessageToThread)
 	e.GET("/api/v1/threads/:threadId", handlers.GetThread)
