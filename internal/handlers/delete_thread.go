@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"agios/internal/repositories"
+	"agios/internal/utils/helpers"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -15,32 +16,20 @@ func DeleteThreadHandler(threadRepo repositories.ThreadRepository) echo.HandlerF
 		threadIDStr := c.Param("threadId")
 		threadID, err := uuid.Parse(threadIDStr)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"error": map[string]string{
-					"message": "Invalid thread ID format.",
-					"code":    "INVALID_THREAD_ID",
-				},
-			})
+			return helpers.JSONError(c, http.StatusBadRequest, "Invalid thread ID format.", "INVALID_THREAD_ID")
 		}
 
 		err = threadRepo.DeleteThread(c.Request().Context(), threadID)
 		if err != nil {
 			if err == gorm.ErrRecordNotFound {
-				return c.JSON(http.StatusNotFound, map[string]interface{}{
-					"error": map[string]string{
-						"message": "Thread not found.",
-						"code":    "THREAD_NOT_FOUND",
-					},
-				})
+				return helpers.JSONError(c, http.StatusNotFound, "Thread not found.", "THREAD_NOT_FOUND")
+
 			}
 
 			c.Logger().Errorf("Error deleting thread %s: %v", threadIDStr, err)
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"error": map[string]string{
-					"message": "Failed to delete thread.",
-					"code":    "INTERNAL_ERROR",
-				},
-			})
+
+			return helpers.JSONError(c, http.StatusInternalServerError, "Failed to delete thread.", "INTERNAL_ERROR")
+
 		}
 
 		return c.NoContent(http.StatusNoContent)
