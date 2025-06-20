@@ -52,7 +52,7 @@ func main() {
 	e.POST("/api/v1/files/upload", handlers.UploadFileHandler(fileService))
 	e.POST("/api/v1/threads", handlers.CreateThread)
 	e.POST("/api/v1/threads/:threadId/messages", handlers.AddMessageToThread)
-	e.GET("/api/v1/threads/:threadId", handlers.GetThread)
+	e.GET("/api/v1/threads/:threadId", handlers.GetThreadHandler(threadRepository))
 	e.DELETE("/api/v1/threads/:threadId", handlers.DeleteThreadHandler(threadRepository))
 	e.DELETE("/api/v1/messages/:messageId", handlers.DeleteMessageHandler(messageRepository))
 

@@ -11,6 +11,7 @@ import (
 
 type ThreadRepository interface {
 	DeleteThread(ctx context.Context, threadID uuid.UUID) error
+	GetThreadWithMessages(ctx context.Context, threadID uuid.UUID) (*models.Thread, error)
 }
 
 type threadRepo struct {
@@ -30,4 +31,15 @@ func (r *threadRepo) DeleteThread(ctx context.Context, threadID uuid.UUID) error
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+func (r *threadRepo) GetThreadWithMessages(ctx context.Context, threadID uuid.UUID) (*models.Thread, error) {
+	var thread models.Thread
+	result := r.db.WithContext(ctx).Preload("Messages", func(db *gorm.DB) *gorm.DB {
+		return db.Order("messages.created_at ASC")
+	}).Where("id = ?", threadID).First(&thread)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &thread, nil
 }
