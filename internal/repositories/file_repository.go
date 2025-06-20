@@ -1,35 +1,49 @@
 package repositories
 
 import (
+	"context"
 	"io"
 	"os"
+
+	"agios/internal/models"
+
+	"gorm.io/gorm"
 )
 
+// FileRepository defines persistence methods.
 type FileRepository interface {
-	SaveFile(dstPath string, src io.Reader) error
-	CreateDirectory(dirPath string) error
+	SaveFile(path string, src io.Reader) error
+	CreateDirectory(dir string) error
+	SaveMetadata(ctx context.Context, uf *models.UploadFile) error
 }
 
-type FileRepositoryImpl struct{}
-
-func NewFileRepository() FileRepository {
-	return &FileRepositoryImpl{}
+// fileRepo implements FileRepository.
+type fileRepo struct {
+	db *gorm.DB
 }
 
-func (r *FileRepositoryImpl) SaveFile(dstPath string, src io.Reader) error {
-	dst, err := os.Create(dstPath)
+// NewFileRepository creates a repository with DB connection.
+func NewFileRepository(db *gorm.DB) FileRepository {
+	return &fileRepo{db: db}
+}
+
+func (r *fileRepo) SaveFile(path string, src io.Reader) error {
+	dst, err := os.Create(path)
 	if err != nil {
 		return err
 	}
 	defer dst.Close()
-
 	_, err = io.Copy(dst, src)
 	return err
 }
 
-func (r *FileRepositoryImpl) CreateDirectory(dirPath string) error {
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		return os.MkdirAll(dirPath, 0755)
+func (r *fileRepo) CreateDirectory(dir string) error {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		return os.MkdirAll(dir, 0755)
 	}
 	return nil
+}
+
+func (r *fileRepo) SaveMetadata(ctx context.Context, uf *models.UploadFile) error {
+	return r.db.WithContext(ctx).Create(uf).Error
 }
