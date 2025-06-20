@@ -11,7 +11,6 @@ require (
 	github.com/redis/go-redis/v9 v9.10.0
 	github.com/strrl/tavily-go v0.1.1
 	github.com/tmc/langchaingo v0.1.13
-	google.golang.org/grpc v1.73.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
 )
@@ -19,6 +18,7 @@ require (
 require (
 	github.com/jackc/pgx/v5 v5.7.5 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.0 // indirect
+	google.golang.org/grpc v1.73.0 // indirect
 )
 
 require (
