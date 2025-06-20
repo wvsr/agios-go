@@ -7,7 +7,12 @@ import (
 )
 
 type Config struct {
-	DatabaseURL      string
+	DBHost           string
+	DBUser           string
+	DBPassword       string
+	DBName           string
+	DBPort           string
+	DBSSLMode        string
 	ExaAPIKey        string
 	TavilyAPIKey     string
 	CerebrasAPIKey   string
@@ -29,7 +34,12 @@ func LoadConfig() (*Config, error) {
 	godotenv.Load()
 
 	cfg := &Config{
-		DatabaseURL:      os.Getenv("DATABASE_URL"),
+		DBHost:           os.Getenv("DB_HOST"),
+		DBUser:           os.Getenv("DB_USER"),
+		DBPassword:       os.Getenv("DB_PASSWORD"),
+		DBName:           os.Getenv("DB_NAME"),
+		DBPort:           os.Getenv("DB_PORT"),
+		DBSSLMode:        os.Getenv("DB_SSLMODE"),
 		ExaAPIKey:        os.Getenv("EXA_API_KEY"),
 		TavilyAPIKey:     os.Getenv("TAVILY_API_KEY"),
 		CerebrasAPIKey:   os.Getenv("CEREBRAS_API_KEY"),

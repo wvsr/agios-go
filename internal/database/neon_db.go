@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"sync"
@@ -17,16 +18,28 @@ var (
 
 func ConnectToNeonDB() error {
 	once.Do(func() {
+
 		err := godotenv.Load()
 		if err != nil {
 			log.Println("No .env file found")
 		}
 
-		dsn := os.Getenv("DATABASE_URL")
-		if dsn == "" {
-			log.Println("DATABASE_URL not set in .env file")
+		host := os.Getenv("DB_HOST")
+		user := os.Getenv("DB_USER")
+		password := os.Getenv("DB_PASSWORD")
+		dbname := os.Getenv("DB_NAME")
+		port := os.Getenv("DB_PORT")
+		sslmode := os.Getenv("DB_SSLMODE")
+
+		if host == "" || user == "" || password == "" || dbname == "" || port == "" || sslmode == "" {
+			log.Println("One or more required DB environment variables are missing")
 			return
 		}
+
+		dsn := fmt.Sprintf(
+			"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+			host, user, password, dbname, port, sslmode,
+		)
 
 		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 		if err != nil {

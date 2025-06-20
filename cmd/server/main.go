@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"agios/internal/database"
 	"agios/internal/handlers"
 	"agios/internal/repositories"
 	"agios/internal/services"
@@ -20,6 +21,11 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
+	if err := database.ConnectToNeonDB(); err != nil {
+		log.Fatal("Failed to connect to database:", err)
+	}
+	defer database.CloseNeonDB()
 
 	e := echo.New()
 
