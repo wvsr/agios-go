@@ -1,69 +1,62 @@
 package database
 
 import (
-	"context"
+	"fmt"
 	"log"
+	"net/url"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/qdrant/go-client/qdrant"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
-var QdrantClient qdrant.QdrantClient
+var QdrantClient *qdrant.Client
 
-func ConnectToQdrant() {
-	godotenv.Load()
+func ConnectToQdrant() error {
+	_ = godotenv.Load()
 
-	qdrantURL := os.Getenv("QDRANT_URL")
-	if qdrantURL == "" {
-		log.Println("QDRANT_URL not set in .env file")
-		return
+	rawURL := os.Getenv("QDRANT_URL")
+	apiKey := os.Getenv("QDRANT_API_KEY")
+
+	if rawURL == "" {
+		return fmt.Errorf("QDRANT_URL not set in environment")
 	}
 
-	qdrantAPIKey := os.Getenv("QDRANT_API_KEY")
-
-	address := qdrantURL
-
-	var dialOptions []grpc.DialOption
-
-	if qdrantAPIKey != "" {
-		dialOptions = append(dialOptions, grpc.WithTransportCredentials(credentials.NewClientTLSFromCert(nil, "")))
-		dialOptions = append(dialOptions, grpc.WithPerRPCCredentials(apiKeyAuth{
-			apiKey: qdrantAPIKey,
-		}))
-	} else {
-		dialOptions = append(dialOptions, grpc.WithInsecure())
-	}
-
-	conn, err := grpc.Dial(address, dialOptions...)
+	u, err := url.Parse(rawURL)
 	if err != nil {
-		log.Println("QDRANT_URL not set in .env file")
-		return
+		return fmt.Errorf("invalid QDRANT_URL: %w", err)
 	}
+
+	host := u.Hostname()
+	port := u.Port()
+	if port == "" {
+		port = "6334" // default gRPC port for Qdrant Cloud
+	}
+
+	portNum, err := strconv.Atoi(port)
 	if err != nil {
-		log.Printf("failed to connect to Qdrant: %v", err)
-		return
+		return fmt.Errorf("invalid port: %w", err)
 	}
 
-	QdrantClient = qdrant.NewQdrantClient(conn)
+	cfg := &qdrant.Config{
+		Host:   host,
+		Port:   portNum,
+		APIKey: apiKey,
+		UseTLS: true,
+	}
 
-	log.Println("Successfully connected to Qdrant!")
+	client, err := qdrant.NewClient(cfg)
+	if err != nil {
+		return fmt.Errorf("failed to create Qdrant client: %w", err)
+	}
+
+	QdrantClient = client
+	log.Println("Successfully connected to Qdrant")
+
+	return nil
 }
 
-func GetQdrantClient() qdrant.QdrantClient {
+func GetQdrantClient() *qdrant.Client {
 	return QdrantClient
-}
-
-type apiKeyAuth struct {
-	apiKey string
-}
-
-func (a apiKeyAuth) GetRequestMetadata(context.Context, ...string) (map[string]string, error) {
-	return map[string]string{"api-key": a.apiKey}, nil
-}
-
-func (a apiKeyAuth) RequireTransportSecurity() bool {
-	return true
 }

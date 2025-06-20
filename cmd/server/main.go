@@ -32,6 +32,10 @@ func main() {
 	}
 	defer database.CloseRedis()
 
+	if err := database.ConnectToQdrant(); err != nil {
+		log.Fatal("Failed to connect to Qdrant:", err)
+	}
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
