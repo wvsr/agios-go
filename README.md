@@ -183,14 +183,13 @@ event: START
 data: {}
 
 event: MARKDOWN_ANSWER
-data: { "answer": "..." }
+data: { "chunk": "...", "streaming": true, }
 
 event: WIDGET
 data: {
   "version": "1.0",
   "widget_type": "WEATHER_WIDGET",
   "streaming": true,
-  "message_id": "uuid"
 }
 ```
 
