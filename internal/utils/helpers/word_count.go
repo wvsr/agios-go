@@ -1,4 +1,4 @@
-package uttils
+package helpers
 
 import (
 	"unicode"
