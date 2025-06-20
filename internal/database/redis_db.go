@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -11,30 +12,28 @@ import (
 
 var RedisClient *redis.Client
 
-func ConnectToRedis() {
-	godotenv.Load()
+func ConnectToRedis() error {
+	_ = godotenv.Load()
 
 	redisURL := os.Getenv("UPSTASH_URL")
 	if redisURL == "" {
-		log.Println("UPSTASH_URL not set in .env file")
-		return
+		return fmt.Errorf("UPSTASH_URL not set in environment")
 	}
 
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {
-		log.Println("failed to parse Redis URL:", err)
-		return
+		return fmt.Errorf("failed to parse Redis URL: %w", err)
 	}
 
 	RedisClient = redis.NewClient(opt)
 
-	_, err = RedisClient.Ping(context.Background()).Result()
-	if err != nil {
-		log.Println("failed to ping Redis:", err)
-		return
+	if _, err := RedisClient.Ping(context.Background()).Result(); err != nil {
+		return fmt.Errorf("failed to ping Redis: %w", err)
 	}
 
-	log.Println("Successfully connected to Upstash Redis!")
+	log.Println("Successfully connected to Redis!")
+
+	return nil
 }
 
 func GetRedisClient() *redis.Client {
@@ -43,10 +42,9 @@ func GetRedisClient() *redis.Client {
 
 func CloseRedis() {
 	if RedisClient != nil {
-		err := RedisClient.Close()
-		if err != nil {
-			log.Println("failed to close Redis:", err)
+		if err := RedisClient.Close(); err != nil {
+			fmt.Println("failed to close Redis:", err)
 		}
-		log.Println("Redis connection closed.")
+		fmt.Println("Redis connection closed.")
 	}
 }

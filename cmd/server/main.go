@@ -27,6 +27,11 @@ func main() {
 	}
 	defer database.CloseNeonDB()
 
+	if err := database.ConnectToRedis(); err != nil {
+		log.Fatal("Failed to connect to Redis:", err)
+	}
+	defer database.CloseRedis()
+
 	e := echo.New()
 
 	e.Use(middleware.Logger())
