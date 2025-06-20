@@ -1,54 +1,67 @@
 package database
 
 import (
-	"context"
 	"log"
 	"os"
+	"sync"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-var NeonPool *pgxpool.Pool
+var (
+	DB   *gorm.DB
+	once sync.Once
+)
 
 func ConnectToNeonDB() error {
-	godotenv.Load()
+	once.Do(func() {
+		err := godotenv.Load()
+		if err != nil {
+			log.Println("No .env file found")
+		}
 
-	dbUrl := os.Getenv("DATABASE_URL")
-	if dbUrl == "" {
-		log.Println("DATABASE_URL not set in .env file")
-		return nil
-	}
+		dsn := os.Getenv("DATABASE_URL")
+		if dsn == "" {
+			log.Println("DATABASE_URL not set in .env file")
+			return
+		}
 
-	config, err := pgxpool.ParseConfig(dbUrl)
-	if err != nil {
-		log.Printf("failed to parse Neon database URL: %v", err)
-		return nil
-	}
+		db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+		if err != nil {
+			log.Printf("failed to connect to NeonDB: %v", err)
+			return
+		}
 
-	NeonPool, err = pgxpool.NewWithConfig(context.Background(), config)
-	if err != nil {
-		log.Printf("failed to create Neon connection pool: %v", err)
-		return nil
-	}
+		sqlDB, err := db.DB()
+		if err != nil {
+			log.Printf("failed to get DB object from GORM: %v", err)
+			return
+		}
 
-	err = NeonPool.Ping(context.Background())
-	if err != nil {
-		log.Printf("failed to ping Neon database: %v", err)
-		return nil
-	}
+		if err := sqlDB.Ping(); err != nil {
+			log.Printf("failed to ping NeonDB: %v", err)
+			return
+		}
 
-	log.Println("Successfully connected to NeonDB!")
+		DB = db
+		log.Println("Successfully connected to NeonDB with GORM!")
+	})
+
 	return nil
 }
 
-func GetNeonPool() *pgxpool.Pool {
-	return NeonPool
+func GetDB() *gorm.DB {
+	return DB
 }
 
 func CloseNeonDB() {
-	if NeonPool != nil {
-		NeonPool.Close()
-		log.Println("NeonDB connection closed.")
+	if DB != nil {
+		sqlDB, err := DB.DB()
+		if err == nil {
+			sqlDB.Close()
+			log.Println("NeonDB GORM connection closed.")
+		}
 	}
 }

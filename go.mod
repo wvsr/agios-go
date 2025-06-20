@@ -4,7 +4,6 @@ go 1.24.2
 
 require (
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.7.5
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/microcosm-cc/bluemonday v1.0.27
@@ -13,10 +12,14 @@ require (
 	github.com/strrl/tavily-go v0.1.1
 	github.com/tmc/langchaingo v0.1.13
 	google.golang.org/grpc v1.73.0
+	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
 )
 
-require github.com/oschwald/maxminddb-golang v1.13.0 // indirect
+require (
+	github.com/jackc/pgx/v5 v5.7.5 // indirect
+	github.com/oschwald/maxminddb-golang v1.13.0 // indirect
+)
 
 require (
 	cloud.google.com/go v0.114.0 // indirect
