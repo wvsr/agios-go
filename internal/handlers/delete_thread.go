@@ -11,6 +11,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// @Summary Delete a thread by ID
+// @Description Delete a thread by thread ID
+// @Tags Threads
+// @Accept json
+// @Produce json
+// @Param threadId path string true "Thread ID"
+// @Success 204 "Thread successfully deleted"
+// @Failure 400 {object} helpers.ErrorResponse "Invalid thread ID format"
+// @Failure 404 {object} helpers.ErrorResponse "Thread not found"
+// @Failure 500 {object} helpers.ErrorResponse "Internal server error"
+// @Router /api/v1/threads/{threadId} [delete]
 func DeleteThreadHandler(threadRepo repositories.ThreadRepository) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		threadIDStr := c.Param("threadId")

@@ -8,6 +8,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @Summary Upload files
+// @Description Upload one or more files
+// @Tags Files
+// @Accept multipart/form-data
+// @Produce json
+// @Param files formData []file true "Files to upload" collectionFormat(multi)
+// @Success 200 {array} services.UploadResult "Successfully uploaded files"
+// @Failure 400 {object} helpers.ErrorResponse "Invalid request or file upload failed"
+// @Router /api/v1/files/upload [post]
 func UploadFileHandler(fileService services.FileService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 

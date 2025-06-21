@@ -11,6 +11,17 @@ import (
 	"gorm.io/gorm"
 )
 
+// @Summary Delete a message by ID
+// @Description Delete a message by message ID
+// @Tags Messages
+// @Accept json
+// @Produce json
+// @Param messageId path string true "Message ID"
+// @Success 204 "Message successfully deleted"
+// @Failure 400 {object} helpers.ErrorResponse "Invalid message ID format"
+// @Failure 404 {object} helpers.ErrorResponse "Message not found"
+// @Failure 500 {object} helpers.ErrorResponse "Internal server error"
+// @Router /api/v1/messages/{messageId} [delete]
 func DeleteMessageHandler(messageRepo repositories.MessageRepository) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		messageIDStr := c.Param("messageId")

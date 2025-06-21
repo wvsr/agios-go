@@ -1,0 +1,195 @@
+basePath: /
+definitions:
+  helpers.ErrorResponse:
+    properties:
+      error:
+        properties:
+          code:
+            type: string
+          message:
+            type: string
+        type: object
+    type: object
+  services.UploadResult:
+    properties:
+      file_name:
+        type: string
+      file_size_bytes:
+        type: integer
+      id:
+        type: string
+      mime_type:
+        type: string
+      original_file_name:
+        type: string
+      uploaded_at:
+        type: string
+      version:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the API documentation for the Agios application.
+  title: Agios API Documentation
+  version: "1.0"
+paths:
+  /api/v1/files/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload one or more files
+      parameters:
+      - collectionFormat: multi
+        description: Files to upload
+        in: formData
+        items:
+          type: file
+        name: files
+        required: true
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully uploaded files
+          schema:
+            items:
+              $ref: '#/definitions/services.UploadResult'
+            type: array
+        "400":
+          description: Invalid request or file upload failed
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: Upload files
+      tags:
+      - Files
+  /api/v1/messages/{messageId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a message by message ID
+      parameters:
+      - description: Message ID
+        in: path
+        name: messageId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Message successfully deleted
+        "400":
+          description: Invalid message ID format
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+        "404":
+          description: Message not found
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: Delete a message by ID
+      tags:
+      - Messages
+  /api/v1/threads/{threadId}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a thread by thread ID
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Thread successfully deleted
+        "400":
+          description: Invalid thread ID format
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+        "404":
+          description: Thread not found
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: Delete a thread by ID
+      tags:
+      - Threads
+    get:
+      consumes:
+      - application/json
+      description: Get a thread and its messages by thread ID
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Thread details with messages
+          schema:
+            properties:
+              created_at:
+                type: string
+              id:
+                type: string
+              messages:
+                items:
+                  properties:
+                    created_at:
+                      type: string
+                    event_type:
+                      type: string
+                    id:
+                      type: string
+                    message_index:
+                      type: integer
+                    meta_data:
+                      type: string
+                    query_text:
+                      type: string
+                    response_text:
+                      type: string
+                    stream_status:
+                      type: string
+                    version:
+                      type: integer
+                  type: object
+                type: array
+              slug:
+                type: string
+              updated_at:
+                type: string
+              version:
+                type: integer
+            type: object
+        "400":
+          description: Invalid thread ID format
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+        "404":
+          description: Thread not found
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/helpers.ErrorResponse'
+      summary: Get a thread by ID
+      tags:
+      - Threads
+swagger: "2.0"

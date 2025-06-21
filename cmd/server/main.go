@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	_ "agios/docs" // Import generated docs
+
 	"agios/internal/database"
 	"agios/internal/handlers"
 	"agios/internal/repositories"
@@ -13,8 +15,14 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger" // echo-swagger middleware
 )
 
+// @title Agios API Documentation
+// @description This is the API documentation for the Agios application.
+// @version 1.0
+// @host localhost:8080
+// @BasePath /
 func main() {
 	err := godotenv.Load()
 
@@ -48,6 +56,13 @@ func main() {
 	threadRepository := repositories.NewThreadRepository(db)
 	messageRepository := repositories.NewMessageRepository(db)
 
+	// @Summary Show the status of the server.
+	// @Description get the status of the server.
+	// @Tags Health
+	// @Accept */*
+	// @Produce json
+	// @Success 200 {object} map[string]interface{}
+	// @Router /health [get]
 	e.GET("/health", handlers.HealthCheck)
 	e.POST("/api/v1/files/upload", handlers.UploadFileHandler(fileService))
 	e.POST("/api/v1/threads", handlers.CreateThread)
@@ -55,6 +70,9 @@ func main() {
 	e.GET("/api/v1/threads/:threadId", handlers.GetThreadHandler(threadRepository))
 	e.DELETE("/api/v1/threads/:threadId", handlers.DeleteThreadHandler(threadRepository))
 	e.DELETE("/api/v1/messages/:messageId", handlers.DeleteMessageHandler(messageRepository))
+
+	// Add Swagger UI endpoint
+	e.GET("/docs/*", echoSwagger.WrapHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {
