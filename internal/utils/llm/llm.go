@@ -10,9 +10,9 @@ import (
 
 	"github.com/google/generative-ai-go/genai"
 	"google.golang.org/api/option"
-)
 
-const DefualtModel = "gemini-1.5-flash"
+	"agios/internal/config"
+)
 
 func newClient(ctx context.Context) (*genai.Client, error) {
 	apiKey := os.Getenv("GEMINI_API_KEY")
@@ -59,7 +59,13 @@ func GenerateFullResponse(ctx context.Context, query string, filePaths []string)
 	if err != nil {
 		return "", fmt.Errorf("failed to create content parts: %w", err)
 	}
-	model := client.GenerativeModel(DefualtModel)
+
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		return "", fmt.Errorf("failed to load config: %w", err)
+	}
+
+	model := client.GenerativeModel(cfg.CurrentLLMModel)
 
 	resp, err := model.GenerateContent(ctx, contents...)
 	if err != nil {
@@ -89,7 +95,13 @@ func GenerateStreamResponse(ctx context.Context, query string, filePaths []strin
 		return nil, fmt.Errorf("failed to create content parts: %w", err)
 	}
 
-	model := client.GenerativeModel(DefualtModel)
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		client.Close()
+		return nil, fmt.Errorf("failed to load config: %w", err)
+	}
+
+	model := client.GenerativeModel(cfg.CurrentLLMModel)
 
 	iter := model.GenerateContentStream(ctx, contents...)
 

@@ -28,6 +28,7 @@ type Config struct {
 	QdrantURL        string
 	UpstashAPIKey    string
 	UpstashURL       string
+	CurrentLLMModel  string
 }
 
 func LoadConfig() (*Config, error) {
@@ -55,6 +56,11 @@ func LoadConfig() (*Config, error) {
 		QdrantURL:        os.Getenv("QDRANT_URL"),
 		UpstashAPIKey:    os.Getenv("UPSTASH_API_KEY"),
 		UpstashURL:       os.Getenv("UPSTASH_URL"),
+		CurrentLLMModel:  os.Getenv("DEFAULT_LLM_MODEL"),
+	}
+
+	if cfg.CurrentLLMModel == "" {
+		cfg.CurrentLLMModel = "gemini-1.5-flash"
 	}
 
 	return cfg, nil
