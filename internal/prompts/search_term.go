@@ -11,13 +11,13 @@ var Search_term_prompt = prompts.PromptTemplate{
       <step>Ignore general words, modifiers, or intent phrases (e.g., "how to", "best way to", "examples of").</step>
       <step>Return only the core search term, as a single value, inside the JSON key "search_terms".</step>
     </instructions>
-    <input_string>{{.text}}</input_string>
+    <input_string>{{.inputText}}</input_string>
     <output_format>
       <json>
-        {{
+        {
           "search_term": str[]
-        }}
+        }
       </json>
     </output_format>
   </prompt>`,
-	InputVariables: []string{"text"}}
+	InputVariables: []string{"inputText"}}

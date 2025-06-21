@@ -40,12 +40,12 @@ var SummaryPrompt = prompts.PromptTemplate{
         <output_format>
         Return the final output in a structured JSON adhering to this schema:
 
-        {{
+        {
         "key_takeaways": [
-            {{
+            {
             "text": "Key takeaway statement.",
             "confidence_score": 96.5
-            }},
+            },
             ...
         ],
         "related_search_terms": [
@@ -55,13 +55,13 @@ var SummaryPrompt = prompts.PromptTemplate{
         ],
         "short_summary": "Three-line very short summary.",
         "metrics": [
-            {{
+            {
             "title": "Metric Title",
             "value": "Number or text"
-            }},
+            },
             ...
         ]
-        }}
+        }
         </output_format>
 
         <format_rules>

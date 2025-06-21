@@ -12,6 +12,8 @@ import (
 	"google.golang.org/api/option"
 )
 
+const DefualtModel = "gemini-1.5-flash"
+
 func newClient(ctx context.Context) (*genai.Client, error) {
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	if apiKey == "" {
@@ -57,7 +59,7 @@ func GenerateFullResponse(ctx context.Context, query string, filePaths []string)
 	if err != nil {
 		return "", fmt.Errorf("failed to create content parts: %w", err)
 	}
-	model := client.GenerativeModel("gemini-1.5-flash")
+	model := client.GenerativeModel(DefualtModel)
 
 	resp, err := model.GenerateContent(ctx, contents...)
 	if err != nil {
@@ -87,7 +89,7 @@ func GenerateStreamResponse(ctx context.Context, query string, filePaths []strin
 		return nil, fmt.Errorf("failed to create content parts: %w", err)
 	}
 
-	model := client.GenerativeModel("gemini-1.5-flash")
+	model := client.GenerativeModel(DefualtModel)
 
 	iter := model.GenerateContentStream(ctx, contents...)
 

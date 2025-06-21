@@ -28,7 +28,7 @@ func tryParseSearchTermsLLMOutput(raw string) (*SearchTerm, bool) {
 }
 
 func ExtractSearchTerms(ctx context.Context, text string) (*SearchTerm, error) {
-	formattedPrompt, err := prompts.Search_term_prompt.Format(map[string]any{text: text})
+	formattedPrompt, err := prompts.Search_term_prompt.Format(map[string]any{"inputText": text})
 	if err != nil {
 		return nil, err
 	}

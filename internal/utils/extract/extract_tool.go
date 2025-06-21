@@ -29,7 +29,7 @@ func tryParseSearchToolOutput(raw string) (*ToolType, bool) {
 }
 
 func ExtractToolType(ctx context.Context, text string) (*ToolType, error) {
-	formattedPrompt, err := prompts.ToolDetectorPromptK.Format(map[string]any{text: text})
+	formattedPrompt, err := prompts.ToolDetectorPrompt.Format(map[string]any{"user_query": text})
 
 	if err != nil {
 		return nil, err
