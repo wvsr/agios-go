@@ -6,6 +6,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 type SearchTerm struct {
@@ -33,16 +34,25 @@ func ExtractSearchTerms(ctx context.Context, text string) (*SearchTerm, error) {
 		return nil, err
 	}
 
-	for range 2 {
-		result, errMsg := llm.GenerateText(ctx, formattedPrompt)
-		if errMsg != "" {
-			continue
+	// Use the new GenerateFullResponse function with retry logic
+	var result string
+	var llmErr error // Use a different variable name for the LLM error
+	for attempt := 0; attempt < 2; attempt++ {
+		result, llmErr = llm.GenerateFullResponse(ctx, formattedPrompt, nil)
+		if llmErr == nil {
+			// Attempt to parse the result if LLM call was successful
+			parsed, ok := tryParseSearchTermsLLMOutput(result)
+			if ok {
+				return parsed, nil
+			}
+			// If parsing fails, continue to the next attempt
 		}
-		parsed, ok := tryParseSearchTermsLLMOutput(result)
-		if ok {
-			return parsed, nil
-		}
+		// If LLM call failed, or parsing failed, continue to the next attempt
 	}
 
-	return nil, errors.New("failed to parse LLM output into structured data")
+	// If both attempts failed to produce a parsable result
+	if llmErr != nil {
+		return nil, fmt.Errorf("failed to generate text after multiple attempts: %w", llmErr)
+	}
+	return nil, errors.New("failed to parse LLM output into structured data after multiple attempts")
 }

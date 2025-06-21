@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"agios/internal/config"
 	"agios/internal/models"
 	"agios/internal/repositories"
 	"agios/internal/utils/constant"
@@ -60,25 +61,21 @@ func CreateThreadHandler(threadRepo repositories.ThreadRepository, messageRepo r
 			return helpers.JSONError(c, http.StatusConflict, "Thread already exists", "SLUG_ALREADY_EXISTS")
 		}
 
-		// --- Implement thread and initial message creation logic ---
-
-		// 1. Create new Thread model
 		newThread := &models.Thread{
 			Slug: req.Slug,
-			// UserID will be set here if authentication is implemented
 		}
 
-		// 2. Create the thread in the database
 		if err := threadRepo.CreateThread(c.Request().Context(), newThread); err != nil {
 			return helpers.JSONError(c, http.StatusInternalServerError, "Database error creating thread", "THREAD_CREATION_FAILED")
 		}
 
-		// 3. Create new Message model for the initial message
+		cfg, _ := config.LoadConfig()
+
 		initialMessage := &models.Message{
 			ThreadID:     newThread.ID,
 			QueryText:    &req.QueryText,
-			MessageIndex: 0,                                      // First message in the thread
-			Model:        "placeholder-model",                    // TODO: Set actual model used
+			MessageIndex: 0,
+			Model:        cfg.CurrentLLMModel,
 			InputToken:   0,                                      // TODO: Calculate input tokens
 			OutputToken:  0,                                      // TODO: Calculate output tokens
 			ResponseTime: 0,                                      // TODO: Measure response time
@@ -87,26 +84,20 @@ func CreateThreadHandler(threadRepo repositories.ThreadRepository, messageRepo r
 			MetaData:     datatypes.JSON([]byte("{}")),           // Initial empty metadata as JSON byte slice
 		}
 
-		// 4. Handle file associations if file_ids are provided
 		if len(req.FileIDs) > 0 {
 			files, err := fileRepo.GetFilesByIDs(c.Request().Context(), req.FileIDs)
 			if err != nil {
-				// Log the error but don't necessarily fail the request if files are just skipped
-				// For now, we'll return an error, but this could be adjusted based on desired behavior
 				return helpers.JSONError(c, http.StatusInternalServerError, "Database error retrieving files", "FILE_RETRIEVAL_FAILED")
 			}
-			// Associate retrieved files with the message
 			initialMessage.Files = files
-			// Note: According to README, if specific file id doesn't exist, it will skip that specific file.
-			// The current GetFilesByIDs implementation returns an error if any ID is invalid.
-			// A more robust implementation might filter out invalid/non-existent IDs and log a warning.
+			// todo: skip file if it doesnt exist rather than returning error
 		}
 
-		// 5. Create the initial message in the database
-		// GORM should handle the many-to-many association with files when creating the message
 		if err := messageRepo.CreateMessage(c.Request().Context(), initialMessage); err != nil {
-			// If message creation fails, consider deleting the newly created thread to avoid orphans
-			// For this starting point, we'll just return the error
+			deleteErr := threadRepo.DeleteThread(c.Request().Context(), newThread.ID)
+			if deleteErr != nil {
+				c.Logger().Errorf("Failed to delete thread %s after message creation failed: %v", newThread.ID, deleteErr)
+			}
 			return helpers.JSONError(c, http.StatusInternalServerError, "Database error creating initial message", "MESSAGE_CREATION_FAILED")
 		}
 

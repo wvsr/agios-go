@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"agios/internal/prompts"
 	"agios/internal/utils/llm"
@@ -54,13 +55,25 @@ func ExtractTakeaways(ctx context.Context, input string) (*ExtractionOutput, err
 		return nil, err
 	}
 
+	// Use the new GenerateFullResponse function with retry logic
+	var result string
+	var llmErr error // Use a different variable name for the LLM error
 	for attempt := 0; attempt < 2; attempt++ {
-		result, _ := llm.GenerateText(ctx, prompt)
-		parsed, ok := tryParseSummaryLLMOutput(result)
-		if ok {
-			return parsed, nil
+		result, llmErr = llm.GenerateFullResponse(ctx, prompt, nil)
+		if llmErr == nil {
+			// Attempt to parse the result if LLM call was successful
+			parsed, ok := tryParseSummaryLLMOutput(result)
+			if ok {
+				return parsed, nil
+			}
+			// If parsing fails, continue to the next attempt
 		}
+		// If LLM call failed, or parsing failed, continue to the next attempt
 	}
 
-	return nil, errors.New("failed to parse LLM output into structured data")
+	// If both attempts failed to produce a parsable result
+	if llmErr != nil {
+		return nil, fmt.Errorf("failed to generate text after multiple attempts: %w", llmErr)
+	}
+	return nil, errors.New("failed to parse LLM output into structured data after multiple attempts")
 }
