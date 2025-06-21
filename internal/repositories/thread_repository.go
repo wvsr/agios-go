@@ -12,6 +12,8 @@ import (
 type ThreadRepository interface {
 	DeleteThread(ctx context.Context, threadID uuid.UUID) error
 	GetThreadWithMessages(ctx context.Context, threadID uuid.UUID) (*models.Thread, error)
+	GetThreadBySlug(ctx context.Context, slug string) (*models.Thread, error)
+	CreateThread(ctx context.Context, thread *models.Thread) error
 }
 
 type threadRepo struct {
@@ -42,4 +44,20 @@ func (r *threadRepo) GetThreadWithMessages(ctx context.Context, threadID uuid.UU
 		return nil, result.Error
 	}
 	return &thread, nil
+}
+
+func (r *threadRepo) GetThreadBySlug(ctx context.Context, slug string) (*models.Thread, error) {
+	var thread models.Thread
+	result := r.db.WithContext(ctx).Where("slug = ?", slug).First(&thread)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, result.Error
+	}
+	return &thread, nil
+}
+
+func (r *threadRepo) CreateThread(ctx context.Context, thread *models.Thread) error {
+	return r.db.WithContext(ctx).Create(thread).Error
 }

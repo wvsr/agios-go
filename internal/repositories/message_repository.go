@@ -11,6 +11,7 @@ import (
 
 type MessageRepository interface {
 	DeleteMessage(ctx context.Context, messageID uuid.UUID) error
+	CreateMessage(ctx context.Context, message *models.Message) error
 }
 
 type messageRepo struct {
@@ -30,4 +31,8 @@ func (r *messageRepo) DeleteMessage(ctx context.Context, messageID uuid.UUID) er
 		return gorm.ErrRecordNotFound
 	}
 	return nil
+}
+
+func (r *messageRepo) CreateMessage(ctx context.Context, message *models.Message) error {
+	return r.db.WithContext(ctx).Create(message).Error
 }
