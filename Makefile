@@ -1,4 +1,4 @@
-.PHONY: build run dev test clean migrate-up migrate-down
+.PHONY: build run dev test clean migrate-up migrate-down install-dev fmt lint tidy swagger
 
 # Build the application
 build:
@@ -32,6 +32,7 @@ migrate-down:
 install-dev:
 	go install github.com/cosmtrek/air@latest
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+	go install github.com/swaggo/swag/cmd/swag@latest # Add swag to dev dependencies install
 
 # Format code
 fmt:
@@ -44,3 +45,7 @@ lint:
 # Tidy dependencies
 tidy:
 	go mod tidy
+
+# Generate Swagger documentation
+swagger:
+	swag init -g cmd/server/main.go
